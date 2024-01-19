@@ -1,74 +1,124 @@
-let menu = $('#menu');
+$(document).ready(function () {
 
-$('#burger').on('click', function () {
-    menu.addClass('open');
-});
+    function scrollToProducts () {
+        $('.products-title')[0].scrollIntoView({behavior: "smooth"});
+    }
 
-$('.close').on('click', () => {
-    menu.removeClass('open');
-});
+    function makeOrder() {
+        $('.order')[0].scrollIntoView({behavior: "smooth"});
+    }
 
-$('.menu-item').on('click', () => {
-    menu.removeClass('open');
-});
+    $('#macaroons').on('click', scrollToProducts);
+
+    $('#about-us').on('click', () => {
+        $('.advantages-title')[0].scrollIntoView({behavior: "smooth"});
+    })
+
+    $('#make-order').on('click', makeOrder);
+
+    $('.main-btn').on('click', scrollToProducts);
+
+    $('.product-button').click((e) => {
+        $('#order').val($(e.target).parents('.product').find('.product-text').text());
+        makeOrder();
+    });
 
 
-let loader = $('.loader');
-function loaderOpen() {
-    loader.css('display', 'flex');
-}
-function loaderClose() {
-    loader.hide();
-}
+    let menu = $('#menu');
 
-function hideForm () {
-    $('.order-text').remove();
-    $('.order-image').remove();
-    $('.order-success').show();
-}
+    function menuOpen() {
+        menu.addClass('open');
+    }
 
-$('#submit').click(function () {
+    function menuClose() {
+        menu.removeClass('open');
+    }
+
+    $('#burger').on('click', menuOpen);
+
+    $('.close').on('click', menuClose);
+
+    $('.menu-item').on('click', menuClose);
+
+
+    let loader = $('.loader');
+
+    function loaderOpen() {
+        loader.css('display', 'flex');
+    }
+
+    function loaderClose() {
+        loader.hide();
+    }
+
+    function hideForm() {
+        $('.order-text').remove();
+        $('.order-image').remove();
+        $('.order-success').show();
+    }
+
     let order = $('#order');
     let name = $('#name');
     let phone = $('#phone');
-    let hasError = false;
+    phone.inputmask({"mask": "(999) 999-9999"});
+    function formValidation() {
 
-    $('.error-input').hide();
+        let hasError = false;
 
-    if (!order.val()) {
-        order.css('border-color', 'red');
-        order.next().show();
-        hasError = true;
+        $('.error-input').hide();
+
+        if (!order.val()) {
+            order.css('border-color', 'red');
+            order.next().show();
+            hasError = true;
+        } else if (order.val()) {
+            order.css('border-color', '#821328');
+        }
+
+        if (!name.val()) {
+            name.css('border-color', 'red');
+            name.next().show();
+            hasError = true;
+        } else if (name.val()) {
+            name.css('border-color', '#821328');
+        }
+
+        if (!phone.val()) {
+            phone.css('border-color', 'red');
+            phone.next().show();
+            hasError = true;
+        } else if (phone.val()) {
+            phone.css('border-color', '#821328');
+        }
+
+        if (!hasError) {
+            loaderOpen();
+            $.ajax({
+                method: "POST",
+                url: "https://testologia.site/checkout",
+                data: {order: order.val(), name: name.val(), phone: phone.val()}
+            })
+                .done(function (msg) {
+                    setTimeout(() => {
+                        loaderClose();
+                        console.log(msg);
+                        if (msg.success) {
+                            hideForm();
+                        } else {
+                            alert("Возникла ошибка при оформлении заказа, позвоните нам и сделайте заказ");
+                        }
+                    }, 1000);
+                });
+            clearForm();
+        }
+
+        function clearForm() {
+            name.val("");
+            phone.val("");
+            order.val()("");
+        }
     }
 
-    if (!name.val()) {
-        name.css('border-color', 'red');
-        name.next().show();
-        hasError = true;
-    }
-    if (!phone.val()) {
-        phone.css('border-color', 'red');
-        phone.next().show();
-        hasError = true;
-    }
+    $('#submit').on('click', formValidation);
 
-    if (!hasError) {
-        loaderOpen();
-        $.ajax({
-            method: "POST",
-            url: "https://testologia.site/checkout",
-            data: {order: order.val(), name: name.val(), phone: phone.val()}
-        })
-            .done(function (msg) {
-                setTimeout(() => {
-                    loaderClose();
-                    console.log(msg);
-                    if (msg.success) {
-                        hideForm();
-                    } else {
-                        alert("Возникла ошибка при оформлении заказа, позвоните нам и сделайте заказ");
-                    }
-                }, 1000);
-            });
-    }
-})
+});
