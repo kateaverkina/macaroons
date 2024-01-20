@@ -1,4 +1,7 @@
 $(document).ready(function () {
+    new WOW({
+        animateClass: 'animate__animated'
+    }).init();
 
     function scrollToProducts () {
         $('.products-title')[0].scrollIntoView({behavior: "smooth"});
